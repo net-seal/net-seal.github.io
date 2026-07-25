@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://net-seal.github.io/sitemap.xml
