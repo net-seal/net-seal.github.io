@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Explore interactive computer networking animations from the NET-SEAL project.">
+  <title>NET-SEAL | Networking Protocol Animations</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --page: #f4f7fb;
+      --surface: #ffffff;
+      --surface-2: #eef3f9;
+      --text: #102033;
+      --muted: #5f6f82;
+      --border: #dbe4ee;
+      --navy: #0b2c4d;
+      --blue: #146c94;
+      --cyan: #19a7ce;
+      --teal: #0c8a80;
+      --accent: #f5b942;
+      --shadow: 0 18px 45px rgba(31, 56, 88, 0.10);
+      --shadow-soft: 0 8px 22px rgba(31, 56, 88, 0.08);
+      --radius-lg: 28px;
+      --radius-md: 18px;
+      --radius-sm: 12px;
+      --header-bg: rgba(255, 255, 255, 0.88);
+      --focus: 0 0 0 4px rgba(25, 167, 206, 0.22);
+    }
+
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --page: #07111d;
+      --surface: #0d1b2b;
+      --surface-2: #122438;
+      --text: #edf6ff;
+      --muted: #a9b8c7;
+      --border: #223a51;
+      --navy: #9ed8ff;
+      --blue: #6dc8f1;
+      --cyan: #33c7e9;
+      --teal: #46c9bb;
+      --accent: #ffd166;
+      --shadow: 0 18px 45px rgba(0, 0, 0, 0.30);
+      --shadow-soft: 0 8px 22px rgba(0, 0, 0, 0.24);
+      --header-bg: rgba(7, 17, 29, 0.88);
+      --focus: 0 0 0 4px rgba(51, 199, 233, 0.24);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(25, 167, 206, 0.10), transparent 28rem),
+        radial-gradient(circle at 90% 22%, rgba(12, 138, 128, 0.08), transparent 24rem),
+        var(--page);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+      transition: background-color 180ms ease, color 180ms ease;
+    }
+
+    a { color: inherit; }
+    button, input { font: inherit; }
+    button { color: inherit; }
+
+    .skip-link {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 1000;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: var(--shadow-soft);
+      transform: translateY(-160%);
+      transition: transform 160ms ease;
+    }
+
+    .skip-link:focus { transform: translateY(0); }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      border-bottom: 1px solid transparent;
+      background: var(--header-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      transition: border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    .site-header.is-scrolled {
+      border-color: var(--border);
+      box-shadow: 0 8px 24px rgba(31, 56, 88, 0.06);
+    }
+
+    .nav-wrap,
+    .main-wrap,
+    .footer-wrap {
+      width: min(1180px, calc(100% - 40px));
+      margin-inline: auto;
+    }
+
+    .nav-wrap {
+      min-height: 74px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      font-weight: 850;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 13px;
+      background: linear-gradient(145deg, #0b2c4d, #19a7ce);
+      color: #ffffff;
+      box-shadow: 0 10px 25px rgba(20, 108, 148, 0.28);
+    }
+
+    .brand-mark svg { width: 26px; height: 26px; }
+
+    .brand-copy { display: grid; line-height: 1.05; }
+    .brand-copy strong { font-size: 1.04rem; }
+    .brand-copy span {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .nav-actions { display: flex; align-items: center; gap: 10px; }
+
+    .icon-button,
+    .secondary-button,
+    .primary-button,
+    .filter-button,
+    .view-button {
+      border: 0;
+      cursor: pointer;
+      transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background 160ms ease;
+    }
+
+    .icon-button:focus-visible,
+    .secondary-button:focus-visible,
+    .primary-button:focus-visible,
+    .filter-button:focus-visible,
+    .view-button:focus-visible,
+    .search-input:focus-visible,
+    .protocol-link:focus-visible,
+    .brand:focus-visible,
+    .footer-link:focus-visible {
+      outline: none;
+      box-shadow: var(--focus);
+    }
+
+    .icon-button {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+    }
+
+    .icon-button:hover { transform: translateY(-2px); box-shadow: var(--shadow-soft); }
+    .icon-button svg { width: 20px; height: 20px; }
+
+    .project-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 42px;
+      padding: 0 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      font-size: 0.9rem;
+      font-weight: 750;
+      text-decoration: none;
+    }
+
+    .project-link:hover { border-color: var(--cyan); transform: translateY(-2px); box-shadow: var(--shadow-soft); }
+
+    main { padding-bottom: 72px; }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      margin-top: 34px;
+      padding: clamp(34px, 5vw, 66px);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: var(--radius-lg);
+      background:
+        linear-gradient(125deg, rgba(11, 44, 77, 0.98), rgba(20, 108, 148, 0.94) 55%, rgba(12, 138, 128, 0.92)),
+        #0b2c4d;
+      color: #ffffff;
+      box-shadow: var(--shadow);
+    }
+
+    .hero::before,
+    .hero::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .hero::before {
+      width: 300px;
+      height: 300px;
+      right: -90px;
+      top: -120px;
+      background: rgba(255,255,255,0.08);
+    }
+
+    .hero::after {
+      width: 220px;
+      height: 220px;
+      left: 36%;
+      bottom: -170px;
+      background: rgba(245,185,66,0.13);
+    }
+
+    .hero-grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+      align-items: center;
+      gap: clamp(30px, 6vw, 80px);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 16px;
+      color: #bfeeff;
+      font-size: 0.78rem;
+      font-weight: 850;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 28px;
+      height: 2px;
+      border-radius: 99px;
+      background: var(--accent);
+    }
+
+    .hero h1 {
+      max-width: 760px;
+      margin: 0;
+      font-size: clamp(2.25rem, 5vw, 4.55rem);
+      line-height: 0.98;
+      letter-spacing: -0.055em;
+    }
+
+    .hero h1 span { color: #7ee7f5; }
+
+    .hero-text {
+      max-width: 670px;
+      margin: 22px 0 0;
+      color: rgba(255,255,255,0.82);
+      font-size: clamp(1rem, 1.7vw, 1.16rem);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .primary-button,
+    .secondary-button {
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      padding: 0 18px;
+      border-radius: 13px;
+      font-weight: 800;
+    }
+
+    .primary-button {
+      background: var(--accent);
+      color: #222d39;
+      box-shadow: 0 12px 28px rgba(245, 185, 66, 0.25);
+    }
+
+    .secondary-button {
+      border: 1px solid rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.09);
+      color: #ffffff;
+    }
+
+    .primary-button:hover,
+    .secondary-button:hover { transform: translateY(-2px); }
+
+    .hero-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 24px;
+      margin-top: 28px;
+      color: rgba(255,255,255,0.76);
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    .hero-stats span { display: inline-flex; align-items: center; gap: 7px; }
+    .hero-stats span::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #65e3cf;
+      box-shadow: 0 0 0 5px rgba(101,227,207,0.12);
+    }
+
+    .network-visual {
+      position: relative;
+      min-height: 320px;
+      isolation: isolate;
+    }
+
+    .network-orbit {
+      position: absolute;
+      inset: 20px;
+      border: 1px dashed rgba(255,255,255,0.22);
+      border-radius: 50%;
+      animation: orbitSpin 28s linear infinite;
+    }
+
+    .network-orbit::before {
+      content: "";
+      position: absolute;
+      width: 9px;
+      height: 9px;
+      top: -5px;
+      left: 50%;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 18px rgba(245,185,66,0.9);
+    }
+
+    .network-lines {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.65;
+    }
+
+    .network-lines line {
+      stroke: rgba(255,255,255,0.50);
+      stroke-width: 1.5;
+      stroke-dasharray: 5 7;
+      animation: dashFlow 7s linear infinite;
+    }
+
+    .node {
+      position: absolute;
+      width: 70px;
+      height: 70px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255,255,255,0.20);
+      border-radius: 22px;
+      background: rgba(255,255,255,0.12);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 15px 35px rgba(0,0,0,0.17);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      animation: nodeFloat 5s ease-in-out infinite;
+    }
+
+    .node svg { width: 31px; height: 31px; }
+    .node-center {
+      width: 96px;
+      height: 96px;
+      left: calc(50% - 48px);
+      top: calc(50% - 48px);
+      border-radius: 29px;
+      background: #ffffff;
+      color: #0b5578;
+      animation-delay: -1s;
+    }
+    .node-a { left: 2%; top: 15%; animation-delay: -2s; }
+    .node-b { right: 1%; top: 10%; animation-delay: -3.4s; }
+    .node-c { left: 7%; bottom: 6%; animation-delay: -4.3s; }
+    .node-d { right: 4%; bottom: 7%; animation-delay: -0.8s; }
+
+    .packet {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      z-index: 4;
+      border: 3px solid #ffffff;
+      border-radius: 4px;
+      background: var(--accent);
+      box-shadow: 0 0 18px rgba(245,185,66,0.75);
+    }
+
+    .packet-one { animation: packetOne 5s ease-in-out infinite; }
+    .packet-two { animation: packetTwo 6.2s ease-in-out infinite 1s; }
+
+    .toolbar-panel {
+      margin-top: 28px;
+      padding: 22px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .toolbar-top {
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .search-wrap { position: relative; }
+
+    .search-wrap svg {
+      position: absolute;
+      width: 21px;
+      height: 21px;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      min-height: 50px;
+      padding: 0 46px 0 48px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface-2);
+      color: var(--text);
+      outline: none;
+      transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+
+    .search-input::placeholder { color: var(--muted); }
+    .search-input:focus { border-color: var(--cyan); background: var(--surface); }
+
+    .clear-search {
+      position: absolute;
+      top: 50%;
+      right: 11px;
+      width: 32px;
+      height: 32px;
+      display: none;
+      place-items: center;
+      border: 0;
+      border-radius: 9px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transform: translateY(-50%);
+    }
+
+    .clear-search:hover { background: var(--surface); color: var(--text); }
+    .clear-search.is-visible { display: grid; }
+
+    .view-controls {
+      display: flex;
+      gap: 6px;
+      padding: 5px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface-2);
+    }
+
+    .view-button {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 9px;
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .view-button[aria-pressed="true"] {
+      background: var(--surface);
+      color: var(--blue);
+      box-shadow: 0 3px 10px rgba(31,56,88,0.08);
+    }
+
+    .view-button svg { width: 19px; height: 19px; }
+
+    .filter-row {
+      display: flex;
+      gap: 9px;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid var(--border);
+      overflow-x: auto;
+      scrollbar-width: thin;
+    }
+
+    .filter-button {
+      flex: 0 0 auto;
+      min-height: 38px;
+      padding: 0 14px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 0.84rem;
+      font-weight: 780;
+      white-space: nowrap;
+    }
+
+    .filter-button:hover { border-color: var(--cyan); color: var(--text); }
+    .filter-button[aria-pressed="true"] {
+      border-color: transparent;
+      background: var(--navy);
+      color: var(--surface);
+    }
+
+    html[data-theme="dark"] .filter-button[aria-pressed="true"] { color: #07111d; }
+
+    .catalog-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 24px;
+      margin: 46px 2px 20px;
+    }
+
+    .catalog-header h2 {
+      margin: 0;
+      color: var(--navy);
+      font-size: clamp(1.7rem, 3vw, 2.45rem);
+      letter-spacing: -0.035em;
+    }
+
+    .catalog-header p { margin: 7px 0 0; color: var(--muted); }
+
+    .result-count {
+      flex: 0 0 auto;
+      padding: 8px 11px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 780;
+      background: var(--surface);
+    }
+
+    .category-section { margin-top: 38px; }
+    .category-section[hidden] { display: none; }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .section-heading::after {
+      content: "";
+      height: 1px;
+      flex: 1;
+      background: var(--border);
+    }
+
+    .section-heading h3 {
+      margin: 0;
+      font-size: 1.08rem;
+      letter-spacing: -0.01em;
+    }
+
+    .section-count {
+      min-width: 27px;
+      height: 27px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 8px;
+      background: var(--surface-2);
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-weight: 850;
+    }
+
+    .protocol-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .protocol-card {
+      position: relative;
+      min-height: 168px;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.7);
+      overflow: hidden;
+      transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+    }
+
+    .protocol-card::before {
+      content: "";
+      position: absolute;
+      width: 110px;
+      height: 110px;
+      right: -48px;
+      top: -48px;
+      border-radius: 50%;
+      background: var(--card-tint, rgba(25,167,206,0.10));
+      transition: transform 220ms ease;
+    }
+
+    .protocol-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(25,167,206,0.48);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .protocol-card:hover::before { transform: scale(1.28); }
+    .protocol-card[hidden] { display: none; }
+
+    .card-top {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .protocol-icon {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 15px;
+      background: var(--icon-bg, #e6f7fb);
+      color: var(--icon-color, #146c94);
+      font-size: 0.78rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+    }
+
+
+    .protocol-card h4 {
+      position: relative;
+      margin: 18px 0 0;
+      color: var(--text);
+      font-size: 1.08rem;
+      line-height: 1.28;
+      letter-spacing: -0.018em;
+    }
+
+
+    .card-footer {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 14px;
+      margin-top: auto;
+      padding-top: 18px;
+    }
+
+
+    .protocol-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border-radius: 8px;
+      color: var(--blue);
+      font-size: 0.82rem;
+      font-weight: 850;
+      text-decoration: none;
+    }
+
+    .protocol-link:hover { color: var(--teal); }
+    .protocol-link svg { width: 15px; height: 15px; transition: transform 160ms ease; }
+    .protocol-link:hover svg { transform: translateX(3px); }
+
+    .protocol-grid.compact { grid-template-columns: 1fr; gap: 10px; }
+
+    .protocol-grid.compact .protocol-card {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 48px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 18px;
+      padding: 15px 17px;
+    }
+
+    .protocol-grid.compact .protocol-card::before { display: none; }
+    .protocol-grid.compact .card-top { display: contents; }
+    .protocol-grid.compact h4 { margin: 0; grid-column: 2; grid-row: 1; }
+    .protocol-grid.compact .card-footer { margin: 0; padding: 0; grid-column: 3; grid-row: 1; justify-content: flex-end; }
+
+    .empty-state {
+      display: none;
+      padding: 56px 24px;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-md);
+      text-align: center;
+      background: var(--surface);
+    }
+
+    .empty-state.is-visible { display: block; }
+    .empty-state svg { width: 42px; height: 42px; color: var(--muted); }
+    .empty-state h3 { margin: 14px 0 5px; }
+    .empty-state p { margin: 0; color: var(--muted); }
+
+
+    .site-footer {
+      padding: 34px 0 42px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .footer-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .footer-wrap p { margin: 0; }
+    .footer-link { border-radius: 7px; color: var(--blue); font-weight: 800; text-decoration: none; }
+    .footer-link:hover { text-decoration: underline; }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(12px);
+      animation: reveal 500ms ease forwards;
+      animation-delay: var(--delay, 0ms);
+    }
+
+    @keyframes reveal { to { opacity: 1; transform: translateY(0); } }
+    @keyframes orbitSpin { to { transform: rotate(360deg); } }
+    @keyframes dashFlow { to { stroke-dashoffset: -72; } }
+    @keyframes nodeFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+    @keyframes packetOne {
+      0%, 12% { left: 13%; top: 26%; opacity: 0; }
+      18% { opacity: 1; }
+      52% { left: 48%; top: 48%; opacity: 1; }
+      88% { left: 81%; top: 22%; opacity: 1; }
+      100% { left: 81%; top: 22%; opacity: 0; }
+    }
+    @keyframes packetTwo {
+      0%, 15% { left: 17%; top: 78%; opacity: 0; }
+      22% { opacity: 1; }
+      52% { left: 48%; top: 48%; opacity: 1; }
+      88% { left: 82%; top: 79%; opacity: 1; }
+      100% { left: 82%; top: 79%; opacity: 0; }
+    }
+
+    @media (max-width: 980px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .network-visual { min-height: 270px; max-width: 520px; width: 100%; margin-inline: auto; }
+      .protocol-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .protocol-grid.compact .protocol-card { grid-template-columns: 48px minmax(0, 1fr) auto; }
+    }
+
+    @media (max-width: 720px) {
+      .nav-wrap, .main-wrap, .footer-wrap { width: min(100% - 24px, 1180px); }
+      .nav-wrap { min-height: 66px; }
+      .brand-copy span { display: none; }
+      .project-link span { display: none; }
+      .project-link { width: 42px; padding: 0; justify-content: center; }
+      .hero { margin-top: 18px; padding: 30px 22px; border-radius: 22px; }
+      .hero h1 { font-size: clamp(2.2rem, 13vw, 3.7rem); }
+      .network-visual { min-height: 235px; }
+      .node { width: 58px; height: 58px; border-radius: 18px; }
+      .node-center { width: 78px; height: 78px; left: calc(50% - 39px); top: calc(50% - 39px); border-radius: 24px; }
+      .toolbar-panel { padding: 15px; }
+      .toolbar-top { grid-template-columns: 1fr auto; }
+      .protocol-grid { grid-template-columns: 1fr; }
+      .catalog-header { align-items: flex-start; }
+      .protocol-grid.compact .protocol-card {
+        display: grid;
+        grid-template-columns: 44px 1fr auto;
+        gap: 13px;
+      }
+      .protocol-grid.compact .protocol-icon { width: 44px; height: 44px; }
+      .protocol-grid.compact h4 { grid-column: 2; }
+      .protocol-grid.compact .card-footer { grid-column: 3; }
+      .footer-wrap { align-items: flex-start; flex-direction: column; }
+    }
+
+    @media (max-width: 430px) {
+      .hero-actions { flex-direction: column; }
+      .hero-actions button { width: 100%; }
+      .hero-stats { display: grid; gap: 10px; }
+      .catalog-header { display: grid; }
+      .result-count { justify-self: start; }
+      .network-visual { min-height: 210px; }
+      .node-a { left: 0; }
+      .node-b { right: 0; }
+      .node-c { left: 2%; }
+      .node-d { right: 1%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#animation-catalog">Skip to animations</a>
+
+  <header class="site-header" id="site-header">
+    <div class="nav-wrap">
+      <a class="brand" href="#top" aria-label="NET-SEAL animations home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="5" cy="6" r="2.2"></circle><circle cx="19" cy="6" r="2.2"></circle><circle cx="12" cy="18" r="2.2"></circle><circle cx="12" cy="11" r="2.5"></circle>
+            <path d="M6.9 7.2 10 9.7M17.1 7.2 14 9.7M12 13.5V15.8"></path>
+          </svg>
+        </span>
+        <span class="brand-copy">
+          <strong>NET-SEAL</strong>
+          <span>Protocol Animation Library</span>
+        </span>
+      </a>
+
+      <nav class="nav-actions" aria-label="Utility navigation">
+        <a class="project-link" href="https://aboelela.site/projects/net-seal/" target="_blank" rel="noopener noreferrer">
+          <span>About the project</span>
+          <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"></path></svg>
+        </a>
+        <button class="icon-button" id="theme-toggle" type="button" aria-label="Switch to dark theme" title="Toggle color theme">
+          <svg class="sun-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"></path></svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <div class="main-wrap">
+      <section class="hero reveal" aria-labelledby="page-title">
+        <div class="hero-grid">
+          <div>
+            <p class="eyebrow">Learn by seeing the network move</p>
+            <h1 id="page-title">Networking concepts, <span>made visible.</span></h1>
+            <p class="hero-text">Explore interactive animations that turn abstract protocols, packet exchanges, and network behavior into concrete visual processes.</p>
+            <div class="hero-actions">
+              <button class="primary-button" id="explore-button" type="button">
+                Explore animations
+                <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+              </button>
+              <button class="secondary-button" id="random-button" type="button">
+                Surprise me
+                <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"></path></svg>
+              </button>
+            </div>
+            <div class="hero-stats" aria-label="Library summary">
+              <span>30 interactive animations</span>
+              <span>8 topic areas</span>
+              <span>Responsive student interface</span>
+            </div>
+          </div>
+
+          <div class="network-visual" aria-hidden="true">
+            <div class="network-orbit"></div>
+            <svg class="network-lines" viewBox="0 0 400 320" preserveAspectRatio="none">
+              <line x1="60" y1="70" x2="200" y2="160"></line>
+              <line x1="340" y1="60" x2="200" y2="160"></line>
+              <line x1="70" y1="270" x2="200" y2="160"></line>
+              <line x1="335" y1="265" x2="200" y2="160"></line>
+              <line x1="60" y1="70" x2="340" y2="60"></line>
+              <line x1="70" y1="270" x2="335" y2="265"></line>
+            </svg>
+            <div class="node node-a">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="12" rx="2"></rect><path d="M8 20h8M12 16v4"></path></svg>
+            </div>
+            <div class="node node-b">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M7 18h10M9 14h6M6 3h12a2 2 0 0 1 2 2v12H4V5a2 2 0 0 1 2-2Z"></path></svg>
+            </div>
+            <div class="node node-c">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M8 7h8M8 11h8M8 15h5"></path></svg>
+            </div>
+            <div class="node node-d">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 12.55a11 11 0 0 1 14.08 0M8.5 16.05a6 6 0 0 1 7 0M12 20h.01"></path></svg>
+            </div>
+            <div class="node node-center">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="3" y="7" width="18" height="10" rx="2"></rect><path d="M7 11h.01M11 11h.01M15 11h2M7 14h10"></path></svg>
+            </div>
+            <span class="packet packet-one"></span>
+            <span class="packet packet-two"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="toolbar-panel reveal" style="--delay: 100ms" aria-label="Animation search and filters">
+        <div class="toolbar-top">
+          <div class="search-wrap">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.6-3.6"></path></svg>
+            <label class="sr-only" for="protocol-search" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">Search animations</label>
+            <input class="search-input" id="protocol-search" type="search" placeholder="Search all animations: ARP, TCP, routing, security…" autocomplete="off">
+            <button class="clear-search" id="clear-search" type="button" aria-label="Clear search">×</button>
+          </div>
+          <div class="view-controls" aria-label="Choose catalog layout">
+            <button class="view-button" id="grid-view" type="button" aria-label="Grid view" aria-pressed="true" title="Grid view">
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg>
+            </button>
+            <button class="view-button" id="list-view" type="button" aria-label="Compact list view" aria-pressed="false" title="Compact list view">
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13"></path><circle cx="4" cy="6" r="1"></circle><circle cx="4" cy="12" r="1"></circle><circle cx="4" cy="18" r="1"></circle></svg>
+            </button>
+          </div>
+        </div>
+        <div class="filter-row" id="filter-row" role="group" aria-label="Filter by topic">
+          <button class="filter-button" type="button" data-filter="all" aria-pressed="true">All topics</button>
+          <button class="filter-button" type="button" data-filter="foundations" aria-pressed="false">Foundations</button>
+          <button class="filter-button" type="button" data-filter="lan" aria-pressed="false">LAN &amp; Switching</button>
+          <button class="filter-button" type="button" data-filter="internet" aria-pressed="false">Addressing &amp; Routing</button>
+          <button class="filter-button" type="button" data-filter="transport" aria-pressed="false">Transport</button>
+          <button class="filter-button" type="button" data-filter="reliability" aria-pressed="false">Reliability</button>
+          <button class="filter-button" type="button" data-filter="applications" aria-pressed="false">Applications</button>
+          <button class="filter-button" type="button" data-filter="wireless" aria-pressed="false">Wireless</button>
+          <button class="filter-button" type="button" data-filter="security" aria-pressed="false">Security</button>
+        </div>
+      </section>
+
+      <section id="animation-catalog" aria-labelledby="catalog-title">
+        <div class="catalog-header">
+          <div>
+            <h2 id="catalog-title">Animation library</h2>
+            <p>Choose a concept to launch its interactive explanation.</p>
+          </div>
+          <div class="result-count" id="result-count" aria-live="polite">Showing 30 of 30</div>
+        </div>
+
+        <div id="catalog-content">
+          <section class="category-section" data-section="foundations">
+            <div class="section-heading"><h3>Foundations &amp; Network Models</h3><span class="section-count">4</span></div>
+            <div class="protocol-grid">
+              <article class="protocol-card" data-category="foundations" data-search="no network disconnected computers communication foundation" style="--icon-bg:#eaf0ff;--icon-color:#5368c4;--card-tint:rgba(83,104,196,.10)">
+                <div class="card-top"><span class="protocol-icon">Ø</span></div>
+                <h4>No Network</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/projects/net-seal/animations/no-network/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+              <article class="protocol-card" data-category="foundations" data-search="osi model seven layers encapsulation networking architecture" style="--icon-bg:#f1ebff;--icon-color:#7554c9;--card-tint:rgba(117,84,201,.10)">
+                <div class="card-top"><span class="protocol-icon">OSI</span></div>
+                <h4>The OSI Model</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/projects/net-seal/animations/osi/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+              <article class="protocol-card" data-category="foundations" data-search="peer to peer p2p network decentralized clients servers" style="--icon-bg:#e9f9f4;--icon-color:#137c69;--card-tint:rgba(19,124,105,.10)">
+                <div class="card-top"><span class="protocol-icon">P2P</span></div>
+                <h4>Peer-to-Peer Network</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/projects/net-seal/animations/p2p/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+              <article class="protocol-card" data-category="foundations wireless" data-search="ad hoc network wireless decentralized temporary nodes" style="--icon-bg:#fff4df;--icon-color:#a96906;--card-tint:rgba(169,105,6,.10)">
+                <div class="card-top"><span class="protocol-icon">AD</span></div>
+                <h4>Ad-Hoc Network</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/projects/net-seal/animations/ad-hoc-network/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+            </div>
+          </section>
+
+          <section class="category-section" data-section="lan">
+            <div class="section-heading"><h3>LAN &amp; Switching</h3><span class="section-count">6</span></div>
+            <div class="protocol-grid">
+              <article class="protocol-card" data-category="lan" data-search="hub shared ethernet collision broadcast physical layer" style="--icon-bg:#e8f6ff;--icon-color:#136c9c;--card-tint:rgba(19,108,156,.10)">
+                <div class="card-top"><span class="protocol-icon">HUB</span></div>
+                <h4>Hub</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/projects/net-seal/animations/hub/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+              <article class="protocol-card" data-category="lan" data-search="switch ethernet mac address forwarding layer 2" style="--icon-bg:#e5faf6;--icon-color:#0f8477;--card-tint:rgba(15,132,119,.10)">
+                <div class="card-top"><span class="protocol-icon">SW</span></div>
+                <h4>Switch</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/switch/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+              <article class="protocol-card" data-category="lan" data-search="switched network no server peer local area network" style="--icon-bg:#eef3ff;--icon-color:#4e67b3;--card-tint:rgba(78,103,179,.10)">
+                <div class="card-top"><span class="protocol-icon">LAN</span></div>
+                <h4>Switched Network Without a Server</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/projects/net-seal/animations/switched-no-server/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+              <article class="protocol-card" data-category="lan applications" data-search="switched network server client centralized services" style="--icon-bg:#eaf7ff;--icon-color:#176f9a;--card-tint:rgba(23,111,154,.10)">
+                <div class="card-top"><span class="protocol-icon">C/S</span></div>
+                <h4>Switched Network With a Server</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/projects/net-seal/animations/switched-with-server/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+              <article class="protocol-card" data-category="lan" data-search="adding switches expanded lan interconnect topology" style="--icon-bg:#f3edff;--icon-color:#7758bf;--card-tint:rgba(119,88,191,.10)">
+                <div class="card-top"><span class="protocol-icon">SW+</span></div>
+                <h4>Adding Switches</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/projects/net-seal/animations/adding-switches/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+              <article class="protocol-card" data-category="lan" data-search="switch congestion queues buffering dropped frames traffic" style="--icon-bg:#fff0ed;--icon-color:#b54d3f;--card-tint:rgba(181,77,63,.10)">
+                <div class="card-top"><span class="protocol-icon">Q</span></div>
+                <h4>Switch Congestion</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/projects/net-seal/animations/switch-congestion/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+            </div>
+          </section>
+
+          <section class="category-section" data-section="internet">
+            <div class="section-heading"><h3>Addressing, Routing &amp; Internet Access</h3><span class="section-count">7</span></div>
+            <div class="protocol-grid">
+              <article class="protocol-card" data-category="internet lan" data-search="arp address resolution protocol ip to mac request reply" style="--icon-bg:#e7f8f5;--icon-color:#0d7e72;--card-tint:rgba(13,126,114,.10)">
+                <div class="card-top"><span class="protocol-icon">ARP</span></div>
+                <h4>Address Resolution Protocol</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/projects/net-seal/animations/arp/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+              <article class="protocol-card" data-category="internet lan" data-search="arp multiple networks router gateway remote subnet" style="--icon-bg:#e9f6ff;--icon-color:#1b6e9d;--card-tint:rgba(27,110,157,.10)">
+                <div class="card-top"><span class="protocol-icon">ARP+</span></div>
+                <h4>ARP With Multiple Networks</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/projects/net-seal/animations/arp-lan/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+              <article class="protocol-card" data-category="internet applications" data-search="dhcp dynamic host configuration discover offer request acknowledgment dora" style="--icon-bg:#fff5df;--icon-color:#a76d0a;--card-tint:rgba(167,109,10,.10)">
+                <div class="card-top"><span class="protocol-icon">DHCP</span></div>
+                <h4>DHCP</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/projects/net-seal/animations/dhcp/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+              <article class="protocol-card" data-category="internet" data-search="routing router forwarding table path next hop ip packet" style="--icon-bg:#edf0ff;--icon-color:#5965b5;--card-tint:rgba(89,101,181,.10)">
+                <div class="card-top"><span class="protocol-icon">RT</span></div>
+                <h4>Routing</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/projects/net-seal/animations/routing/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+              <article class="protocol-card" data-category="internet" data-search="ip subnet subnetting network prefix mask address range" style="--icon-bg:#e7f9ee;--icon-color:#1c7b4f;--card-tint:rgba(28,123,79,.10)">
+                <div class="card-top"><span class="protocol-icon">/24</span></div>
+                <h4>IP Subnets</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/projects/net-seal/animations/subnets/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+              <article class="protocol-card" data-category="internet" data-search="ip fragmentation mtu fragments reassembly packet" style="--icon-bg:#fff0e9;--icon-color:#b45d36;--card-tint:rgba(180,93,54,.10)">
+                <div class="card-top"><span class="protocol-icon">FRAG</span></div>
+                <h4>IP Fragmentation</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/projects/net-seal/animations/ip-fragmentation/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+              <article class="protocol-card" data-category="internet applications" data-search="internet access isp gateway nat router external network web" style="--icon-bg:#e8f7ff;--icon-color:#18749f;--card-tint:rgba(24,116,159,.10)">
+                <div class="card-top"><span class="protocol-icon">WAN</span></div>
+                <h4>Internet Access</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/projects/net-seal/animations/internet-access/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+            </div>
+          </section>
+
+          <section class="category-section" data-section="transport">
+            <div class="section-heading"><h3>Transport Protocols</h3><span class="section-count">5</span></div>
+            <div class="protocol-grid">
+              <article class="protocol-card" data-category="transport" data-search="tcp connections handshake syn syn ack connection teardown" style="--icon-bg:#e8f1ff;--icon-color:#416eb5;--card-tint:rgba(65,110,181,.10)">
+                <div class="card-top"><span class="protocol-icon">TCP</span></div>
+                <h4>TCP Connections</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/projects/net-seal/animations/tcp-connections/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+              <article class="protocol-card" data-category="transport" data-search="tcp multiplexing ports sockets applications demultiplexing" style="--icon-bg:#f0edff;--icon-color:#6a58b3;--card-tint:rgba(106,88,179,.10)">
+                <div class="card-top"><span class="protocol-icon">MUX</span></div>
+                <h4>TCP Multiplexing</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/projects/net-seal/animations/tcp-multiplexing/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+              <article class="protocol-card" data-category="transport" data-search="tcp buffering sequencing sequence number ordered delivery segments" style="--icon-bg:#e7f8f2;--icon-color:#19795f;--card-tint:rgba(25,121,95,.10)">
+                <div class="card-top"><span class="protocol-icon">SEQ</span></div>
+                <h4>TCP Buffering &amp; Sequencing</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/projects/net-seal/animations/tcp-buffering-and-sequencing/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+              <article class="protocol-card" data-category="transport" data-search="udp user datagram protocol connectionless best effort datagram" style="--icon-bg:#fff4dc;--icon-color:#9c6a10;--card-tint:rgba(156,106,16,.10)">
+                <div class="card-top"><span class="protocol-icon">UDP</span></div>
+                <h4>User Datagram Protocol</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/projects/net-seal/animations/udp/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+              <article class="protocol-card" data-category="transport reliability" data-search="tcp flow control sliding window receiver advertised window rwnd" style="--icon-bg:#ffeceb;--icon-color:#af4b49;--card-tint:rgba(175,75,73,.10)">
+                <div class="card-top"><span class="protocol-icon">WIN</span></div>
+                <h4>TCP Flow Control</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/projects/net-seal/animations/tcp-flow-control/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+            </div>
+          </section>
+
+          <section class="category-section" data-section="reliability">
+            <div class="section-heading"><h3>Reliable Data Transfer</h3><span class="section-count">3</span></div>
+            <div class="protocol-grid">
+              <article class="protocol-card" data-category="reliability" data-search="stop and wait arq automatic repeat request ack timeout retransmission" style="--icon-bg:#fff0e8;--icon-color:#b06035;--card-tint:rgba(176,96,53,.10)">
+                <div class="card-top"><span class="protocol-icon">S&amp;W</span></div>
+                <h4>Stop-and-Wait ARQ</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/projects/net-seal/animations/stop-and-wait-arq/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+              <article class="protocol-card" data-category="reliability" data-search="go back n arq sliding window cumulative acknowledgment retransmit" style="--icon-bg:#eaf2ff;--icon-color:#4a69b3;--card-tint:rgba(74,105,179,.10)">
+                <div class="card-top"><span class="protocol-icon">GBN</span></div>
+                <h4>Go-Back-N ARQ</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/projects/net-seal/animations/go-back-n-arq/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+              <article class="protocol-card" data-category="reliability" data-search="selective repeat arq individual acknowledgment buffering retransmission" style="--icon-bg:#e5f9f3;--icon-color:#117b68;--card-tint:rgba(17,123,104,.10)">
+                <div class="card-top"><span class="protocol-icon">SR</span></div>
+                <h4>Selective Repeat ARQ</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/projects/net-seal/animations/selective-repeat-arq/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+            </div>
+          </section>
+
+          <section class="category-section" data-section="applications">
+            <div class="section-heading"><h3>Application Protocols</h3><span class="section-count">1</span></div>
+            <div class="protocol-grid">
+              <article class="protocol-card" data-category="applications" data-search="email protocols smtp pop imap mail server client application" style="--icon-bg:#f0ebff;--icon-color:#7051bd;--card-tint:rgba(112,81,189,.10)">
+                <div class="card-top"><span class="protocol-icon">MAIL</span></div>
+                <h4>Email Protocols</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/projects/net-seal/animations/email-protocols/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+            </div>
+          </section>
+
+          <section class="category-section" data-section="wireless">
+            <div class="section-heading"><h3>Wireless Networking</h3><span class="section-count">1</span></div>
+            <div class="protocol-grid">
+              <article class="protocol-card" data-category="wireless lan" data-search="wireless network maca multiple access collision avoidance csma ca medium" style="--icon-bg:#e8f8ff;--icon-color:#17789f;--card-tint:rgba(23,120,159,.10)">
+                <div class="card-top"><span class="protocol-icon">MACA</span></div>
+                <h4>Wireless Network &amp; MACA</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/projects/net-seal/animations/wireless-and-maca/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+            </div>
+          </section>
+
+          <section class="category-section" data-section="security">
+            <div class="section-heading"><h3>Network Security</h3><span class="section-count">3</span></div>
+            <div class="protocol-grid">
+              <article class="protocol-card" data-category="security internet" data-search="vpn virtual private network encrypted tunnel remote access" style="--icon-bg:#e8f5ff;--icon-color:#166e9b;--card-tint:rgba(22,110,155,.10)">
+                <div class="card-top"><span class="protocol-icon">VPN</span></div>
+                <h4>Virtual Private Network</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/projects/net-seal/animations/vpn/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+              <article class="protocol-card" data-category="security" data-search="public key encryption asymmetric cryptography public private keys confidentiality" style="--icon-bg:#fff4df;--icon-color:#a66c08;--card-tint:rgba(166,108,8,.10)">
+                <div class="card-top"><span class="protocol-icon">KEY</span></div>
+                <h4>Public Key Encryption</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/projects/net-seal/animations/public-key-encryption/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+              <article class="protocol-card" data-category="security internet" data-search="firewall packet filtering policy allow deny perimeter security" style="--icon-bg:#ffedeb;--icon-color:#b14d45;--card-tint:rgba(177,77,69,.10)">
+                <div class="card-top"><span class="protocol-icon">FW</span></div>
+                <h4>Firewalls</h4>
+                <div class="card-footer"><a class="protocol-link" href="https://aboelela.site/projects/net-seal/animations/firewalls/" target="_blank" rel="noopener noreferrer">Launch animation <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></div>
+              </article>
+            </div>
+          </section>
+        </div>
+
+        <div class="empty-state" id="empty-state" role="status">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5M8.5 11h5"></path></svg>
+          <h3>No animations found</h3>
+          <p>Try another term or choose a different topic.</p>
+        </div>
+      </section>
+</div>
+  </main>
+
+  <script>
+    (() => {
+      const root = document.documentElement;
+      const header = document.getElementById('site-header');
+      const themeToggle = document.getElementById('theme-toggle');
+      const searchInput = document.getElementById('protocol-search');
+      const clearSearch = document.getElementById('clear-search');
+      const filterButtons = [...document.querySelectorAll('.filter-button')];
+      const cards = [...document.querySelectorAll('.protocol-card')];
+      const sections = [...document.querySelectorAll('.category-section')];
+      const resultCount = document.getElementById('result-count');
+      const emptyState = document.getElementById('empty-state');
+      const gridView = document.getElementById('grid-view');
+      const listView = document.getElementById('list-view');
+      const grids = [...document.querySelectorAll('.protocol-grid')];
+      const exploreButton = document.getElementById('explore-button');
+      const randomButton = document.getElementById('random-button');
+      let activeFilter = 'all';
+
+      const savedTheme = localStorage.getItem('net-seal-theme');
+      const systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      root.dataset.theme = savedTheme || (systemDark ? 'dark' : 'light');
+      updateThemeLabel();
+
+      function updateThemeLabel() {
+        const isDark = root.dataset.theme === 'dark';
+        themeToggle.setAttribute('aria-label', isDark ? 'Switch to light theme' : 'Switch to dark theme');
+        themeToggle.setAttribute('title', isDark ? 'Use light theme' : 'Use dark theme');
+      }
+
+      themeToggle.addEventListener('click', () => {
+        root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('net-seal-theme', root.dataset.theme);
+        updateThemeLabel();
+      });
+
+      function normalize(value) {
+        return value.toLowerCase().trim().replace(/[^a-z0-9+&/\s-]/g, '');
+      }
+
+      function applyFilters() {
+        const query = normalize(searchInput.value);
+        let visibleCount = 0;
+
+        cards.forEach((card) => {
+          const categories = card.dataset.category.split(' ');
+          const matchesCategory = query || activeFilter === 'all' || categories.includes(activeFilter);
+          const haystack = normalize(`${card.dataset.search} ${card.textContent}`);
+          const matchesSearch = !query || query.split(/\s+/).every((word) => haystack.includes(word));
+          const visible = matchesCategory && matchesSearch;
+          card.hidden = !visible;
+          if (visible) visibleCount += 1;
+        });
+
+        sections.forEach((section) => {
+          const visibleCards = [...section.querySelectorAll('.protocol-card')].filter((card) => !card.hidden);
+          section.hidden = visibleCards.length === 0;
+          section.querySelector('.section-count').textContent = visibleCards.length;
+        });
+
+        resultCount.textContent = `Showing ${visibleCount} of ${cards.length}`;
+        emptyState.classList.toggle('is-visible', visibleCount === 0);
+        clearSearch.classList.toggle('is-visible', searchInput.value.length > 0);
+      }
+
+      filterButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          activeFilter = button.dataset.filter;
+          filterButtons.forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+          applyFilters();
+        });
+      });
+
+      searchInput.addEventListener('input', applyFilters);
+      clearSearch.addEventListener('click', () => {
+        searchInput.value = '';
+        searchInput.focus();
+        applyFilters();
+      });
+
+      gridView.addEventListener('click', () => setView('grid'));
+      listView.addEventListener('click', () => setView('list'));
+
+      function setView(view) {
+        const compact = view === 'list';
+        grids.forEach((grid) => grid.classList.toggle('compact', compact));
+        gridView.setAttribute('aria-pressed', String(!compact));
+        listView.setAttribute('aria-pressed', String(compact));
+        localStorage.setItem('net-seal-view', view);
+      }
+
+      setView(localStorage.getItem('net-seal-view') === 'list' ? 'list' : 'grid');
+
+      exploreButton.addEventListener('click', () => {
+        document.getElementById('animation-catalog').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        window.setTimeout(() => searchInput.focus({ preventScroll: true }), 500);
+      });
+
+      randomButton.addEventListener('click', () => {
+        const visibleCards = cards.filter((card) => !card.hidden);
+        const pool = visibleCards.length ? visibleCards : cards;
+        const card = pool[Math.floor(Math.random() * pool.length)];
+        const link = card.querySelector('.protocol-link');
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        card.animate(
+          [{ transform: 'translateY(-5px) scale(1)' }, { transform: 'translateY(-5px) scale(1.025)' }, { transform: 'translateY(-5px) scale(1)' }],
+          { duration: 620, easing: 'ease-out' }
+        );
+        window.setTimeout(() => link.focus({ preventScroll: true }), 650);
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === '/' && document.activeElement !== searchInput) {
+          event.preventDefault();
+          searchInput.focus();
+        }
+        if (event.key === 'Escape' && document.activeElement === searchInput) {
+          searchInput.value = '';
+          searchInput.blur();
+          applyFilters();
+        }
+      });
+
+      window.addEventListener('scroll', () => {
+        header.classList.toggle('is-scrolled', window.scrollY > 10);
+      }, { passive: true });
+
+      applyFilters();
+    })();
+  </script>
+</body>
+</html>
